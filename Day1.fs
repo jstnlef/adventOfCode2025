@@ -4,32 +4,31 @@ open System.IO
 open Common.Math
 
 module Rotations =
+  let dialTotal = 100
+
   let findPassword rotations =
-    let doRotations (p, zeros) next =
-      let delta = p + next
+    let spinDial (dial, zeroCount) rotation =
+      let distance = dial + rotation
 
       let newZeros =
-        if p = 0 || delta > 0 then
-          (abs delta) / 100
-        else
-          1 + (abs delta) / 100
+        abs distance / dialTotal + (if dial <> 0 && distance <= 0 then 1 else 0)
 
-      modulo delta 100, zeros + newZeros
+      modulo distance dialTotal, zeroCount + newZeros
 
-    rotations
-    |> Seq.fold doRotations (50, 0)
-    |> snd
+    rotations |> Seq.fold spinDial (50, 0) |> snd
 
   let countZeros rotations =
     rotations
-    |> Seq.scan (fun p n -> modulo (p + n) 100) 50
+    |> Seq.scan (fun p n -> modulo (p + n) dialTotal) 50
     |> Seq.filter (fun n -> n = 0)
     |> Seq.length
 
   let parse filename =
     filename
     |> File.ReadLines
-    |> Seq.map (fun line -> if line[0] = 'R' then int line[1..] else -(int line[1..]))
+    |> Seq.map (fun line ->
+      let value = int line[1..]
+      if line[0] = 'R' then value else -value)
 
 module Tests =
   open Xunit
