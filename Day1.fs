@@ -5,24 +5,24 @@ open Common.Math
 
 module Rotations =
   let findPassword rotations =
+    let doRotations (p, zeros) next =
+      let delta = p + next
+
+      let newZeros =
+        if p = 0 || delta > 0 then
+          (abs delta) / 100
+        else
+          1 + (abs delta) / 100
+
+      modulo delta 100, zeros + newZeros
+
     rotations
-    |> Seq.fold
-      (fun (p, zeros) n ->
-        let delta = p + n
-
-        let newZeros =
-          if p = 0 || delta > 0 then
-            zeros + ((abs delta) / 100)
-          else
-            zeros + 1 + ((abs delta) / 100)
-
-        modulo delta 100, newZeros)
-      (50, 0)
+    |> Seq.fold doRotations (50, 0)
     |> snd
 
   let countZeros rotations =
     rotations
-    |> Seq.scan (fun state n -> modulo (state + n) 100) 50
+    |> Seq.scan (fun p n -> modulo (p + n) 100) 50
     |> Seq.filter (fun n -> n = 0)
     |> Seq.length
 
