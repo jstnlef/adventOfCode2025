@@ -6,7 +6,7 @@ open Common.Math
 module Rotations =
   let findPassword rotations =
     rotations
-    |> Array.fold
+    |> Seq.fold
       (fun (p, zeros) n ->
         let delta = p + n
 
@@ -22,15 +22,14 @@ module Rotations =
 
   let countZeros rotations =
     rotations
-    |> Array.scan (fun state n -> modulo (state + n) 100) 50
-    |> Array.filter (fun n -> n = 0)
-    |> Array.length
+    |> Seq.scan (fun state n -> modulo (state + n) 100) 50
+    |> Seq.filter (fun n -> n = 0)
+    |> Seq.length
 
   let parse filename =
     filename
     |> File.ReadLines
     |> Seq.map (fun line -> if line[0] = 'R' then int line[1..] else -(int line[1..]))
-    |> Seq.toArray
 
 module Tests =
   open Xunit
