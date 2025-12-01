@@ -5,10 +5,20 @@ open Common.Math
 
 module Rotations =
   let findPassword rotations =
-    let x =
-      rotations |> Array.scan (fun (p, zeros) n -> modulo (p + n) 100, zeros) (50, 0)
+    rotations
+    |> Array.fold
+      (fun (p, zeros) n ->
+        let delta = p + n
 
-    0
+        let newZeros =
+          if p = 0 || delta > 0 then
+            zeros + ((abs delta) / 100)
+          else
+            zeros + 1 + ((abs delta) / 100)
+
+        modulo delta 100, newZeros)
+      (50, 0)
+    |> snd
 
   let countZeros rotations =
     rotations
@@ -34,7 +44,7 @@ module Tests =
 
   [<Theory>]
   [<InlineData("Inputs/Day1/test.txt", 6)>]
-  [<InlineData("Inputs/Day1/input.txt", -1)>]
+  [<InlineData("Inputs/Day1/input.txt", 6554)>]
   let ``What is the password to open the door using 0x434C49434B method`` (filename: string, expected: int) =
     let result = filename |> Rotations.parse |> Rotations.findPassword
     Assert.Equal(expected, result)
