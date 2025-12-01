@@ -44,6 +44,6 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day1/test.txt", 6)>]
   [<InlineData("Inputs/Day1/input.txt", 6554)>]
-  let ``What is the password to open the door using 0x434C49434B method`` (filename: string, expected: int) =
+  let ``The password to open the door using 0x434C49434B method`` (filename: string, expected: int) =
     let result = filename |> Rotations.parse |> Rotations.findPassword
     Assert.Equal(expected, result)
