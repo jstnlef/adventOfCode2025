@@ -11,12 +11,12 @@ let isInvalidNewRules (id: string) =
   let inner = doubled.Substring(1, doubled.Length - 2)
   inner.Contains id
 
-let findInvalidIDs (invalidFunc: string -> bool) idRange =
+let findInvalidIDs (idIsInvalid: string -> bool) idRange =
   idRange
   |> Array.Parallel.collect (fun (first, last) ->
-    seq { first..last }
-    |> Seq.filter (fun n -> invalidFunc (string n))
-    |> Seq.toArray)
+    [| for n in first..last do
+         if idIsInvalid (string n) then
+           yield n |])
 
 let parse filename =
   filename
