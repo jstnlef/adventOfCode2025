@@ -2,28 +2,24 @@ module Day2
 
 open System.IO
 
-let isValidOld (id: int64) =
-  let s = string id
-  let mid = s.Length / 2
-  s.Substring(0, mid) = s.Substring(mid)
+let isValidOld (id: string) =
+  let mid = id.Length / 2
+  id.Substring(0, mid) = id.Substring(mid)
 
-let isValidNew (id: int64) =
-  let isRepeatedSubstring (s: string) =
-    let doubled = s + s
-    let inner = doubled.Substring(1, doubled.Length - 2)
-    inner.Contains s
+let isValidNew (id: string) =
+  let doubled = id + id
+  let inner = doubled.Substring(1, doubled.Length - 2)
+  inner.Contains id
 
-  id |> string |> isRepeatedSubstring
-
-let findInvalidIDs (validFunc: int64 -> bool) idRange =
+let findInvalidIDs (validFunc: string -> bool) idRange =
   idRange
-  |> Seq.collect (fun (min, max) -> seq { int64 min .. int64 max } |> Seq.filter validFunc)
+  |> Seq.collect (fun (min, max) -> seq { int64 min .. int64 max } |> Seq.filter (fun n -> validFunc (string n)))
 
 let parse filename =
   filename
   |> File.ReadAllText
   |> _.Split(",")
-  |> Array.map (fun s ->
+  |> Seq.map (fun s ->
     let split = s.Split("-")
     (split[0], split[1]))
 
