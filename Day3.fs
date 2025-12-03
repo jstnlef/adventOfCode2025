@@ -3,9 +3,7 @@ module Day3
 open System.IO
 
 let findMaxIndex (batteries: string) =
-  seq { 9..-1..1 }
-  |> Seq.find (fun i -> batteries.IndexOf(i.ToString()) > -1)
-  |> (fun max -> batteries.IndexOf(max.ToString()))
+  batteries |> Seq.maxBy int |> (fun i -> batteries.IndexOf(i.ToString()))
 
 let findMaxBatteryJoltage numBatteries (batteries: string) =
   [| let mutable leftMostI = 0
