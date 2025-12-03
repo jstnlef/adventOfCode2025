@@ -17,15 +17,19 @@ let findMax2BatteryJoltage (batteries: string) =
 
 let findMaxBatteryJoltage numBatteries (batteries: string) =
   [| let mutable leftMostI = 0
-     let mutable found = 0
+     let mutable toFind = numBatteries
 
-     while found < numBatteries do
-       let subBattery = batteries.Substring(leftMostI, batteries.Length - numBatteries)
-
+     while toFind > 1 do
+       let windowLength = batteries.Length - leftMostI - toFind + 1
+       let subBattery = batteries.Substring(leftMostI, windowLength)
        let maxIndex = findMaxIndex subBattery
-       found <- found + 1
        yield batteries[leftMostI + maxIndex]
-       leftMostI <- leftMostI + maxIndex + 1 |]
+
+       toFind <- toFind - 1
+       leftMostI <- leftMostI + maxIndex + 1
+
+     let lastI = findMaxIndex (batteries.Substring(leftMostI))
+     yield batteries[leftMostI + lastI] |]
   |> System.String
   |> int64
 
@@ -49,7 +53,7 @@ module Tests =
 
   [<Theory>]
   [<InlineData("Inputs/Day3/test.txt", 3121910778619L)>]
-  [<InlineData("Inputs/Day3/input.txt", -1)>]
+  [<InlineData("Inputs/Day3/input.txt", 175053592950232L)>]
   let ``Find the maximum 12 battery output joltage`` (filename: string, expected: int64) =
     let result = filename |> parse |> findTotalMaxBatteryJoltages 12
     Assert.Equal(expected, result)
