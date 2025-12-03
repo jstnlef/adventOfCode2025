@@ -2,24 +2,26 @@ module Day3
 
 open System.IO
 
-let findMaxIndex (batteries: string) =
+let findMaxBatteryIndex (batteries: string) =
   batteries |> Seq.maxBy int |> (fun i -> batteries.IndexOf(i.ToString()))
 
 let findMaxBatteryJoltage numBatteries (batteries: string) =
-  [| let mutable leftMostI = 0
+  [| let mutable leftMostIndex = 0
      let mutable toFind = numBatteries
 
      while toFind > 1 do
-       let windowLength = batteries.Length - leftMostI - toFind + 1
-       let subBattery = batteries.Substring(leftMostI, windowLength)
-       let maxIndex = findMaxIndex subBattery
-       yield batteries[leftMostI + maxIndex]
+       let windowLength = batteries.Length - leftMostIndex - toFind + 1
+       let batteryWindow = batteries.Substring(leftMostIndex, windowLength)
+       let nextBatteryIndex = leftMostIndex + findMaxBatteryIndex batteryWindow
+       yield batteries[nextBatteryIndex]
 
        toFind <- toFind - 1
-       leftMostI <- leftMostI + maxIndex + 1
+       leftMostIndex <- nextBatteryIndex + 1
 
-     let lastI = findMaxIndex (batteries.Substring(leftMostI))
-     yield batteries[leftMostI + lastI] |]
+     let lastBatteryIndex =
+       leftMostIndex + findMaxBatteryIndex (batteries.Substring(leftMostIndex))
+
+     yield batteries[lastBatteryIndex] |]
   |> System.String
   |> int64
 
