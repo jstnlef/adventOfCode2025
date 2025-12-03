@@ -7,14 +7,6 @@ let findMaxIndex (batteries: string) =
   |> Seq.find (fun i -> batteries.IndexOf(i.ToString()) > -1)
   |> (fun max -> batteries.IndexOf(max.ToString()))
 
-let findMax2BatteryJoltage (batteries: string) =
-  let leftMaxIndex = findMaxIndex (batteries.Substring(0, batteries.Length - 1))
-
-  let rightMaxIndex =
-    findMaxIndex (batteries.Substring(leftMaxIndex + 1)) + leftMaxIndex + 1
-
-  int (System.String [| batteries[leftMaxIndex]; batteries[rightMaxIndex] |])
-
 let findMaxBatteryJoltage numBatteries (batteries: string) =
   [| let mutable leftMostI = 0
      let mutable toFind = numBatteries
@@ -33,11 +25,8 @@ let findMaxBatteryJoltage numBatteries (batteries: string) =
   |> System.String
   |> int64
 
-let findTotalMax2BatteryJoltages (banks: string[]) =
-  banks |> Array.sumBy findMax2BatteryJoltage
-
 let findTotalMaxBatteryJoltages numBatteries (banks: string[]) =
-  banks |> Array.sumBy (findMaxBatteryJoltage numBatteries)
+  banks |> Array.Parallel.sumBy (findMaxBatteryJoltage numBatteries)
 
 let parse filename = filename |> File.ReadAllLines
 
@@ -47,8 +36,8 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day3/test.txt", 357)>]
   [<InlineData("Inputs/Day3/input.txt", 17554)>]
-  let ``Find the maximum 2 battery output joltage`` (filename: string, expected: int) =
-    let result = filename |> parse |> findTotalMax2BatteryJoltages
+  let ``Find the maximum 2 battery output joltage`` (filename: string, expected: int64) =
+    let result = filename |> parse |> findTotalMaxBatteryJoltages 2
     Assert.Equal(expected, result)
 
   [<Theory>]
