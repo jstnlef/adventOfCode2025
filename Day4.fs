@@ -3,34 +3,31 @@ module Day4
 open System.IO
 open Common.Grid
 
-let rollIsAccessible (floor: Grid<char>) location =
+let paperRollIsAccessible (floor: Grid<char>) location =
   location
   |> eightWayNeighbors floor
-  |> Seq.filter (fun neighbor -> (get floor neighbor) = '@')
-  |> Seq.length < 4
+  |> Array.filter (fun neighbor -> (get floor neighbor) = '@')
+  |> Array.length < 4
 
 let accessiblePaperRolls (floor: Grid<char>) =
   floor
   |> iter
-  |> Seq.filter (fun loc -> (get floor loc) = '@' && (rollIsAccessible floor loc))
+  |> Seq.filter (fun loc -> (get floor loc) = '@' && (paperRollIsAccessible floor loc))
   |> Seq.toArray
 
 let countAccessiblePaperRolls (floor: Grid<char>) =
-  floor |> accessiblePaperRolls |> Seq.length
+  floor |> accessiblePaperRolls |> _.Length
 
-let removePaperRolls (floor: Grid<char>) (rolls: (int * int) array) : Grid<char> =
+let removePaperRolls (floor: Grid<char>) (rolls: (int * int) array) : unit =
   for x, y in rolls do
     floor[y][x] <- '.'
-
-  floor
-
 
 let countRemovedPaperRolls (floor: Grid<char>) =
   let mutable rollsToRemove = accessiblePaperRolls floor
   let mutable rollsRemoved = rollsToRemove.Length
 
   while rollsToRemove.Length > 0 do
-    removePaperRolls floor rollsToRemove |> ignore
+    removePaperRolls floor rollsToRemove
     rollsToRemove <- accessiblePaperRolls floor
     rollsRemoved <- rollsRemoved + rollsToRemove.Length
 
