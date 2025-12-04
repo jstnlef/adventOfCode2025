@@ -12,8 +12,8 @@ let paperRollIsAccessible (floor: Grid<char>) location =
 let accessiblePaperRolls (floor: Grid<char>) =
   floor
   |> iter
-  |> Seq.filter (fun loc -> (get floor loc) = '@' && (paperRollIsAccessible floor loc))
   |> Seq.toArray
+  |> Array.Parallel.filter (fun loc -> (get floor loc) = '@' && (paperRollIsAccessible floor loc))
 
 let countAccessiblePaperRolls (floor: Grid<char>) =
   floor |> accessiblePaperRolls |> _.Length
