@@ -7,11 +7,13 @@ type IngredientDatabase =
     ingredientIds: int64 array }
 
 module IngredientDatabase =
-  let isFresh (database: IngredientDatabase) (id: int64) =
-    database.freshRanges |> Array.exists (fun (a, b) -> id >= a && id <= b)
+  let isFresh (id: int64) (database: IngredientDatabase) =
+    database.freshRanges
+    |> Array.exists (fun (low, high) -> id >= low && id <= high)
 
   let countFreshIngredients (database: IngredientDatabase) =
-    database.ingredientIds |> Array.Parallel.filter (isFresh database) |> _.Length
+    database.ingredientIds
+    |> Array.sumBy (fun id -> if isFresh id database then 1 else 0)
 
   let countAllPossibleFreshIngredients (database: IngredientDatabase) =
     let inputRanges = database.freshRanges |> Array.sort
