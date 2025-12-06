@@ -16,7 +16,7 @@ module IngredientDatabase =
     |> Array.sumBy (fun id -> if isFresh id database then 1 else 0)
 
   let countAllPossibleFreshIngredients (database: IngredientDatabase) =
-    let inputRanges = database.freshRanges |> Array.sort
+    let inputRanges = database.freshRanges
     let mutable low, high = inputRanges[0]
     let mutable count = 0L
 
@@ -40,7 +40,7 @@ let parse filename =
 
   let ids = split[1].Trim().Split("\n") |> Array.map int64
 
-  { freshRanges = ranges
+  { freshRanges = ranges |> Array.sort
     ingredientIds = ids }
 
 module Tests =
