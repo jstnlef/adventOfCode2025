@@ -1,44 +1,43 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <IsPackable>false</IsPackable>
-    <GenerateProgramFile>false</GenerateProgramFile>
-    <RootNamespace>adventOfCode2025</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <IsPackable>false</IsPackable>
+        <GenerateProgramFile>false</GenerateProgramFile>
+        <RootNamespace>adventOfCode2025</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="CreateDay.fsx"/>
-    <Content Include="**\*.txt" Exclude="bin\**\*.txt;obj\**\*.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <ItemGroup>
+        <None Include="CreateDay.fsx"/>
+        <Content Include="**\*.txt" Exclude="bin\**\*.txt;obj\**\*.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
 
-    <Compile Include="Common\Functools.fs"/>
-    <Compile Include="Common\BTree.fs"/>
-    <Compile Include="Common\Itertools.fs"/>
-    <Compile Include="Common\Vector2d.fs"/>
-    <Compile Include="Common\Input.fs"/>
-    <Compile Include="Common\Grid.fs"/>
-    <Compile Include="Common\Math.fs"/>
-    <Compile Include="Day*.fs"/>
-  </ItemGroup>
+        <Compile Include="Common\Functools.fs"/>
+        <Compile Include="Common\BTree.fs"/>
+        <Compile Include="Common\Itertools.fs"/>
+        <Compile Include="Common\Vector2d.fs"/>
+        <Compile Include="Common\Grid.fs"/>
+        <Compile Include="Common\Math.fs"/>
+        <Compile Include="Day*.fs"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0"/>
-    <PackageReference Include="MathNet.Numerics.FSharp" Version="5.0.0"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
-    <PackageReference Include="xunit" Version="2.9.3"/>
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="6.0.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="MathNet.Numerics" Version="5.0.0"/>
+        <PackageReference Include="MathNet.Numerics.FSharp" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
+        <PackageReference Include="xunit" Version="2.9.3"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Inputs\"/>
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Inputs\"/>
+    </ItemGroup>
 </Project>
