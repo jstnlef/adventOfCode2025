@@ -1,15 +1,70 @@
 module Day10
 
+open System
+open System.Globalization
 open System.IO
+open System.Text.RegularExpressions
 
-type Machine =
-  { indicators: int array
-    buttons: int array
+type MachineDescription =
+  { indicators: uint16
+    buttons: uint16 array
     joltages: int array }
 
-let sumOfFewestButtonPresses (machines: Machine array) = 0
+type Machine =
+  { indicators: uint16
+    buttonPresses: int }
 
-let parse filename = filename |> File.ReadAllLines
+module Machine =
+  let init = { indicators = 0us; buttonPresses = 0 }
+
+  let pressButton (machine: Machine) (button: uint16) : Machine =
+    { machine with
+        indicators = machine.indicators ^^^ button
+        buttonPresses = machine.buttonPresses + 1 }
+
+  let simulateMinimalConfiguration (description: MachineDescription) =
+    [| yield description.buttons[4]; yield description.buttons[5] |]
+    |> Array.fold pressButton init
+
+let sumOfFewestButtonPresses (machineDescriptions: MachineDescription array) =
+  machineDescriptions
+  // TODO: This can probably be done in parallel
+  |> Array.map Machine.simulateMinimalConfiguration
+  |> Array.map _.buttonPresses
+  |> Array.sum
+
+let parse filename =
+  let machineRegex =
+    Regex(@"^\[(?<indicators>[#\.]+)\] (\((?<buttons>[\d,]+)\) *)+ {(?<joltages>[\d,]+)}$")
+
+  let parseMachineDescription (line: string) =
+    let m = machineRegex.Match(line)
+
+    let indicatorString = m.Groups["indicators"].Value
+
+    let indicators =
+      indicatorString
+      |> String.map (fun c -> if c = '#' then '1' else '0')
+      |> (fun s -> UInt16.Parse(s, NumberStyles.BinaryNumber))
+
+    let buttons =
+      m.Groups["buttons"].Captures
+      |> Seq.map (fun c ->
+        c.Value.Split(',')
+        |> Array.map uint16
+        |> Array.fold (fun a n -> a + (1us <<< indicatorString.Length - 1 - int n)) 0us)
+      |> Seq.toArray
+
+    let joltages =
+      m.Groups["joltages"].Captures
+      |> Seq.map (fun c -> c.Value.Split(',') |> Array.map int |> Seq.toArray)
+      |> Seq.head
+
+    { indicators = indicators
+      buttons = buttons
+      joltages = joltages }
+
+  filename |> File.ReadAllLines |> Array.map parseMachineDescription
 
 module Tests =
   open Xunit
@@ -18,7 +73,7 @@ module Tests =
   [<InlineData("Inputs/Day10/test.txt", 7)>]
   [<InlineData("Inputs/Day10/input.txt", -1)>]
   let ``The fewest button presses required to configure the indicator lights`` (filename: string, expected: int) =
-    let result = 0
+    let result = filename |> parse |> sumOfFewestButtonPresses
     Assert.Equal(expected, result)
 
   [<Theory>]
