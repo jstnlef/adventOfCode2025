@@ -34,12 +34,10 @@ let connectCircuit (circuits: List<Circuit>) (a, b) =
   circuits
 
 let multiplyLargestCircuits numberOfCircuits (junctionBoxes: JunctionBox array) =
-  let circuits = List<Circuit>()
-
   junctionBoxes
   |> findShortestPairs
   |> Seq.take numberOfCircuits
-  |> Seq.fold connectCircuit circuits
+  |> Seq.fold connectCircuit (List<Circuit>())
   |> Seq.map _.Count
   |> Seq.sortDescending
   |> Seq.take 3
