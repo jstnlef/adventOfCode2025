@@ -23,7 +23,7 @@ module Machine =
         indicators = machine.indicators ^^^ button
         buttonPresses = machine.buttonPresses + 1 }
 
-  let findMinimalPressesToInit (description: MachineDescription) =
+  let findMinimalInitConfig (description: MachineDescription) =
     let q = Queue<Machine>([| initMachine |])
     let seenIndictors = HashSet<uint16>([| 0us |])
 
@@ -41,9 +41,16 @@ module Machine =
 
     machine
 
-let sumOfFewestButtonPresses (machineDescriptions: MachineDescription array) =
+  let findMinimalJoltageConfig (description: MachineDescription) = initMachine
+
+let sumOfInitialization (machineDescriptions: MachineDescription array) =
   machineDescriptions
-  |> Array.Parallel.map Machine.findMinimalPressesToInit
+  |> Array.Parallel.map Machine.findMinimalInitConfig
+  |> Array.sumBy _.buttonPresses
+
+let sumOfJoltageConfiguration (machineDescriptions: MachineDescription array) =
+  machineDescriptions
+  |> Array.Parallel.map Machine.findMinimalJoltageConfig
   |> Array.sumBy _.buttonPresses
 
 let parse filename =
@@ -86,12 +93,12 @@ module Tests =
   [<InlineData("Inputs/Day10/test.txt", 7)>]
   [<InlineData("Inputs/Day10/input.txt", 547)>]
   let ``The fewest button presses required to configure the indicator lights`` (filename: string, expected: int) =
-    let result = filename |> parse |> sumOfFewestButtonPresses
+    let result = filename |> parse |> sumOfInitialization
     Assert.Equal(expected, result)
 
   [<Theory>]
   [<InlineData("Inputs/Day10/test.txt", -1)>]
   [<InlineData("Inputs/Day10/input.txt", -1)>]
   let ``Part 2`` (filename: string, expected: int) =
-    let result = 0
+    let result = filename |> parse |> sumOfJoltageConfiguration
     Assert.Equal(expected, result)
