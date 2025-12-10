@@ -1,6 +1,7 @@
 module Day10
 
 open System
+open System.Collections.Generic
 open System.Globalization
 open System.IO
 open System.Text.RegularExpressions
@@ -15,7 +16,7 @@ type Machine =
     buttonPresses: int }
 
 module Machine =
-  let init = { indicators = 0us; buttonPresses = 0 }
+  let initMachine = { indicators = 0us; buttonPresses = 0 }
 
   let pressButton (machine: Machine) (button: uint16) : Machine =
     { machine with
@@ -23,12 +24,20 @@ module Machine =
         buttonPresses = machine.buttonPresses + 1 }
 
   let simulateMinimalConfiguration (description: MachineDescription) =
-    [| yield description.buttons[4]; yield description.buttons[5] |]
-    |> Array.fold pressButton init
+    let q = Queue<Machine>([| initMachine |])
+
+    let mutable machine = q.Peek()
+
+    while machine.indicators <> description.indicators do
+      machine <- q.Dequeue()
+
+      for button in description.buttons do
+        q.Enqueue(pressButton machine button)
+
+    machine
 
 let sumOfFewestButtonPresses (machineDescriptions: MachineDescription array) =
   machineDescriptions
-  // TODO: This can probably be done in parallel
   |> Array.map Machine.simulateMinimalConfiguration
   |> Array.map _.buttonPresses
   |> Array.sum
@@ -71,7 +80,7 @@ module Tests =
 
   [<Theory>]
   [<InlineData("Inputs/Day10/test.txt", 7)>]
-  [<InlineData("Inputs/Day10/input.txt", -1)>]
+  [<InlineData("Inputs/Day10/input.txt", 547)>]
   let ``The fewest button presses required to configure the indicator lights`` (filename: string, expected: int) =
     let result = filename |> parse |> sumOfFewestButtonPresses
     Assert.Equal(expected, result)
