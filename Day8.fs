@@ -14,38 +14,6 @@ let findShortestPairs (junctionBoxes: JunctionBox array) =
   }
   |> Seq.sortBy (fun (a, b) -> Vector3d.distanceSquared a b)
 
-let findCircuits (pairs: (JunctionBox * JunctionBox) seq) =
-  let circuits = List<Circuit>()
-
-  let findCircuit a =
-    circuits |> Seq.tryFind (fun c -> c.Contains a)
-
-  for a, b in pairs do
-    match findCircuit a, findCircuit b with
-    | None, None -> circuits.Add(HashSet([| a; b |]))
-    | Some c, None -> c.Add b |> ignore
-    | None, Some c -> c.Add a |> ignore
-    | Some c1, Some c2 ->
-      if c1 <> c2 then
-        circuits.Remove c2 |> ignore
-
-        for j in c2 do
-          c1.Add j |> ignore
-      else
-        ()
-
-  circuits
-
-let multiplyLargestCircuits numberOfCircuits (junctionBoxes: JunctionBox array) =
-  junctionBoxes
-  |> findShortestPairs
-  |> Seq.take numberOfCircuits
-  |> findCircuits
-  |> Seq.map _.Count
-  |> Seq.sortDescending
-  |> Seq.take 3
-  |> Seq.reduce (*)
-
 let connectCircuit (circuits: List<Circuit>) (a, b) =
   let findCircuit a =
     circuits |> Seq.tryFind (fun c -> c.Contains a)
@@ -64,6 +32,18 @@ let connectCircuit (circuits: List<Circuit>) (a, b) =
       ()
 
   circuits
+
+let multiplyLargestCircuits numberOfCircuits (junctionBoxes: JunctionBox array) =
+  let circuits = List<Circuit>()
+
+  junctionBoxes
+  |> findShortestPairs
+  |> Seq.take numberOfCircuits
+  |> Seq.fold connectCircuit circuits
+  |> Seq.map _.Count
+  |> Seq.sortDescending
+  |> Seq.take 3
+  |> Seq.reduce (*)
 
 let multiplyLastTwoJunctionBoxes (junctionBoxes: JunctionBox array) : int64 =
   let circuits = List<Circuit>()
