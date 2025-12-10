@@ -23,8 +23,9 @@ module Machine =
         indicators = machine.indicators ^^^ button
         buttonPresses = machine.buttonPresses + 1 }
 
-  let simulateMinimalConfiguration (description: MachineDescription) =
+  let findMinimalPressesToInit (description: MachineDescription) =
     let q = Queue<Machine>([| initMachine |])
+    let seenIndictors = HashSet<uint16>([| 0us |])
 
     let mutable machine = q.Peek()
 
@@ -32,15 +33,18 @@ module Machine =
       machine <- q.Dequeue()
 
       for button in description.buttons do
-        q.Enqueue(pressButton machine button)
+        let nextMachine = pressButton machine button
+
+        if seenIndictors.Contains(nextMachine.indicators) |> not then
+          seenIndictors.Add(nextMachine.indicators) |> ignore
+          q.Enqueue(nextMachine)
 
     machine
 
 let sumOfFewestButtonPresses (machineDescriptions: MachineDescription array) =
   machineDescriptions
-  |> Array.map Machine.simulateMinimalConfiguration
-  |> Array.map _.buttonPresses
-  |> Array.sum
+  |> Array.Parallel.map Machine.findMinimalPressesToInit
+  |> Array.sumBy _.buttonPresses
 
 let parse filename =
   let machineRegex =
