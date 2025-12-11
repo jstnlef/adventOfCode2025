@@ -5,31 +5,36 @@ open System.Collections.Generic
 open System.Globalization
 open System.IO
 open System.Text.RegularExpressions
-open MathNet.Numerics.LinearAlgebra
+open Microsoft.Z3
 
 type MachineDescription =
   { indicators: uint16
-    buttons: uint16 array
+    indicatorSize: int
+    buttons: uint16 array array
     joltages: int array }
 
 type Machine =
   { indicators: uint16
-    buttonPresses: int
-    joltages: int array }
+    indicatorSize: int
+    buttonPresses: int }
 
 module Machine =
-  let initMachine joltageLength =
+  let initMachine indicatorSize =
     { indicators = 0us
-      buttonPresses = 0
-      joltages = [| for _ in 0 .. joltageLength - 1 -> 0 |] }
+      indicatorSize = indicatorSize
+      buttonPresses = 0 }
 
-  let pressConfigButton (machine: Machine) (button: uint16) : Machine =
+  let pressConfigButton (machine: Machine) (button: uint16 array) : Machine =
+    let button =
+      button
+      |> Array.fold (fun a n -> a + (1us <<< machine.indicatorSize - 1 - int n)) 0us
+
     { machine with
         indicators = machine.indicators ^^^ button
         buttonPresses = machine.buttonPresses + 1 }
 
   let findMinimalInitConfig (description: MachineDescription) =
-    let startMachine = initMachine description.joltages.Length
+    let startMachine = initMachine description.indicatorSize
     let q = Queue<Machine>([| startMachine |])
     let seenIndictors = HashSet<uint16>([| 0us |])
 
@@ -48,17 +53,41 @@ module Machine =
     machine
 
   let findMinimalJoltageConfig (description: MachineDescription) =
-    let buttons =
-      description.buttons
-      |> Array.map (fun b ->
-        Convert.ToString(int16 b, 2).PadLeft(description.joltages.Length, '0')
-        |> Seq.map Char.GetNumericValue
-        |> Seq.toList)
-      |> Array.toList
-      |> matrix
+    let ctx = new Context()
+    let optimiser = ctx.MkOptimize()
+    let zero = ctx.MkInt(0)
+    let buttons = [| for i in description.buttons -> ctx.MkIntConst($"b{i}") |]
 
-    let expectedJoltages = description.joltages |> Array.map double |> vector
-    buttons.Solve(expectedJoltages) |> Vector.map (round >> int) |> Seq.sum
+    for button in buttons do
+      optimiser.Add(ctx.MkGe(button, zero))
+
+    let makeEquation (joltageIndex: uint16) =
+      let associatedButtons =
+        description.buttons
+        |> Array.indexed
+        |> Array.filter (fun (_, b) -> b |> Array.contains joltageIndex)
+        |> Array.map (fun (i, _) -> buttons[i] :> ArithExpr)
+
+      ctx.MkEq(ctx.MkAdd associatedButtons, ctx.MkInt(description.joltages[int joltageIndex]))
+
+    for joltageIndex in 0 .. description.joltages.Length - 1 do
+      optimiser.Add(makeEquation (uint16 joltageIndex))
+
+    let buttonExprs = buttons |> Array.map (fun expr -> expr :> ArithExpr)
+
+    optimiser.MkMinimize(ctx.MkAdd buttonExprs) |> ignore
+
+    if optimiser.Check() = Status.SATISFIABLE then
+      let model = optimiser.Model
+
+      let buttonPresses =
+        model.Decls
+        |> Array.sortBy _.Name.ToString()
+        |> Array.map (fun decl -> (model.ConstInterp decl).ToString() |> int)
+
+      buttonPresses |> Array.sum
+    else
+      failwith "No solution found"
 
 let sumOfInitialization (machineDescriptions: MachineDescription array) =
   machineDescriptions
@@ -84,10 +113,7 @@ let parse filename =
 
     let buttons =
       m.Groups["buttons"].Captures
-      |> Seq.map (fun c ->
-        c.Value.Split(',')
-        |> Array.map uint16
-        |> Array.fold (fun a n -> a + (1us <<< indicatorString.Length - 1 - int n)) 0us)
+      |> Seq.map (fun c -> c.Value.Split(',') |> Array.map uint16)
       |> Seq.toArray
 
     let joltages =
@@ -96,6 +122,7 @@ let parse filename =
       |> Seq.head
 
     { indicators = indicators
+      indicatorSize = indicatorString.Length
       buttons = buttons
       joltages = joltages }
 
@@ -116,6 +143,6 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day10/test.txt", 33)>]
   [<InlineData("Inputs/Day10/input.txt", -1)>]
-  let ``Part 2: The fewest button presses required to set the joltages`` (filename: string, expected: int) =
+  let ``Part 2: The fewest button presses required to set the joltages`` (filename: string, expected: int64) =
     let result = filename |> parse |> sumOfJoltageConfiguration
     Assert.Equal(expected, result)
