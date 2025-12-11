@@ -5,6 +5,7 @@ open System.Collections.Generic
 open System.Globalization
 open System.IO
 open System.Text.RegularExpressions
+open MathNet.Numerics.LinearAlgebra
 
 type MachineDescription =
   { indicators: uint16
@@ -13,18 +14,23 @@ type MachineDescription =
 
 type Machine =
   { indicators: uint16
-    buttonPresses: int }
+    buttonPresses: int
+    joltages: int array }
 
 module Machine =
-  let initMachine = { indicators = 0us; buttonPresses = 0 }
+  let initMachine joltageLength =
+    { indicators = 0us
+      buttonPresses = 0
+      joltages = [| for _ in 0 .. joltageLength - 1 -> 0 |] }
 
-  let pressButton (machine: Machine) (button: uint16) : Machine =
+  let pressConfigButton (machine: Machine) (button: uint16) : Machine =
     { machine with
         indicators = machine.indicators ^^^ button
         buttonPresses = machine.buttonPresses + 1 }
 
   let findMinimalInitConfig (description: MachineDescription) =
-    let q = Queue<Machine>([| initMachine |])
+    let startMachine = initMachine description.joltages.Length
+    let q = Queue<Machine>([| startMachine |])
     let seenIndictors = HashSet<uint16>([| 0us |])
 
     let mutable machine = q.Peek()
@@ -33,7 +39,7 @@ module Machine =
       machine <- q.Dequeue()
 
       for button in description.buttons do
-        let nextMachine = pressButton machine button
+        let nextMachine = pressConfigButton machine button
 
         if seenIndictors.Contains(nextMachine.indicators) |> not then
           seenIndictors.Add(nextMachine.indicators) |> ignore
@@ -41,7 +47,18 @@ module Machine =
 
     machine
 
-  let findMinimalJoltageConfig (description: MachineDescription) = initMachine
+  let findMinimalJoltageConfig (description: MachineDescription) =
+    let buttons =
+      description.buttons
+      |> Array.map (fun b ->
+        Convert.ToString(int16 b, 2).PadLeft(description.joltages.Length, '0')
+        |> Seq.map Char.GetNumericValue
+        |> Seq.toList)
+      |> Array.toList
+      |> matrix
+
+    let expectedJoltages = description.joltages |> Array.map double |> vector
+    buttons.Solve(expectedJoltages) |> Vector.map (round >> int) |> Seq.sum
 
 let sumOfInitialization (machineDescriptions: MachineDescription array) =
   machineDescriptions
@@ -49,9 +66,7 @@ let sumOfInitialization (machineDescriptions: MachineDescription array) =
   |> Array.sumBy _.buttonPresses
 
 let sumOfJoltageConfiguration (machineDescriptions: MachineDescription array) =
-  machineDescriptions
-  |> Array.Parallel.map Machine.findMinimalJoltageConfig
-  |> Array.sumBy _.buttonPresses
+  machineDescriptions |> Array.map Machine.findMinimalJoltageConfig |> Array.sum
 
 let parse filename =
   let machineRegex =
@@ -92,13 +107,15 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day10/test.txt", 7)>]
   [<InlineData("Inputs/Day10/input.txt", 547)>]
-  let ``The fewest button presses required to configure the indicator lights`` (filename: string, expected: int) =
+  let ``Part 1: The fewest button presses required to configure the indicator lights``
+    (filename: string, expected: int)
+    =
     let result = filename |> parse |> sumOfInitialization
     Assert.Equal(expected, result)
 
   [<Theory>]
-  [<InlineData("Inputs/Day10/test.txt", -1)>]
+  [<InlineData("Inputs/Day10/test.txt", 33)>]
   [<InlineData("Inputs/Day10/input.txt", -1)>]
-  let ``Part 2`` (filename: string, expected: int) =
+  let ``Part 2: The fewest button presses required to set the joltages`` (filename: string, expected: int) =
     let result = filename |> parse |> sumOfJoltageConfiguration
     Assert.Equal(expected, result)
