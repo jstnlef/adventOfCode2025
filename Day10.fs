@@ -80,14 +80,9 @@ module Machine =
     optimiser.MkMinimize(ctx.MkAdd buttonExprs) |> ignore
 
     if optimiser.Check() = Status.SATISFIABLE then
-      let model = optimiser.Model
-
-      let buttonPresses =
-        model.Decls
-        |> Array.sortBy _.Name.ToString()
-        |> Array.map (fun decl -> (model.ConstInterp decl).ToString() |> int)
-
-      buttonPresses |> Array.sum
+      optimiser.Model.Consts
+      |> Seq.map (fun kvp -> kvp.Value.ToString() |> int)
+      |> Seq.sum
     else
       failwith "No solution found"
 
