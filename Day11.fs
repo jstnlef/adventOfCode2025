@@ -18,7 +18,27 @@ let findAllPathsOut (serverRack: IDictionary<string, string[]>) =
             yield! dfs n (n :: path) (visited.Add n)
     }
 
-  dfs start [ start ] (Set [ "you" ]) |> Seq.length
+  dfs start [ start ] (Set [ start ]) |> Seq.length
+
+
+let findAllPathsFromSvrToOut (serverRack: IDictionary<string, string[]>) =
+  let start = "svr"
+
+  let rec dfs (current: string) (path: string list) (visited: Set<string>) =
+    seq {
+      if current = "out" then
+        yield List.rev path
+      else
+        let _, neighbors = serverRack.TryGetValue current
+
+        for n in neighbors do
+          if not (visited.Contains n) then
+            yield! dfs n (n :: path) (visited.Add n)
+    }
+
+  dfs start [ start ] (Set [ start ])
+  |> Seq.filter (fun path -> List.contains "dac" path && List.contains "fft" path)
+  |> Seq.length
 
 let parse filename =
   let parseLine (line: string) =
@@ -40,8 +60,8 @@ module Tests =
     Assert.Equal(expected, result)
 
   [<Theory>]
-  [<InlineData("Inputs/Day11/test.txt", -1)>]
+  [<InlineData("Inputs/Day11/test2.txt", 2)>]
   [<InlineData("Inputs/Day11/input.txt", -1)>]
-  let ``Part 2:`` (filename: string, expected: int) =
-    let result = 0
+  let ``Part 2: Number of paths from svr to out`` (filename: string, expected: int) =
+    let result = filename |> parse |> findAllPathsFromSvrToOut
     Assert.Equal(expected, result)
