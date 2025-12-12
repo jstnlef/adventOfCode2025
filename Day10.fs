@@ -56,7 +56,9 @@ module Machine =
     let ctx = new Context()
     let optimiser = ctx.MkOptimize()
     let zero = ctx.MkInt(0)
-    let buttons = [| for i in description.buttons -> ctx.MkIntConst($"b{i}") |]
+
+    let buttons =
+      [| for i in 0 .. description.buttons.Length - 1 -> ctx.MkIntConst($"b{i}") |]
 
     for button in buttons do
       optimiser.Add(ctx.MkGe(button, zero))
@@ -142,7 +144,7 @@ module Tests =
 
   [<Theory>]
   [<InlineData("Inputs/Day10/test.txt", 33)>]
-  [<InlineData("Inputs/Day10/input.txt", -1)>]
+  [<InlineData("Inputs/Day10/input.txt", 21111)>]
   let ``Part 2: The fewest button presses required to set the joltages`` (filename: string, expected: int64) =
     let result = filename |> parse |> sumOfJoltageConfiguration
     Assert.Equal(expected, result)
