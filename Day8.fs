@@ -65,7 +65,7 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day8/test.txt", 10, 40)>]
   [<InlineData("Inputs/Day8/input.txt", 1000, 121770)>]
-  let ``Multiply together the sizes of the three largest circuits``
+  let ``Part 1: Multiply together the sizes of the three largest circuits``
     (filename: string, numberOfCircuits: int, expected: int)
     =
     let result = filename |> parse |> multiplyLargestCircuits numberOfCircuits
@@ -74,6 +74,8 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day8/test.txt", 25272)>]
   [<InlineData("Inputs/Day8/input.txt", 7893123992L)>]
-  let ``Multiply together the X coordinates of the last two junction boxes`` (filename: string, expected: int64) =
+  let ``Part 2: Multiply together the X coordinates of the last two junction boxes``
+    (filename: string, expected: int64)
+    =
     let result = filename |> parse |> multiplyLastTwoJunctionBoxes
     Assert.Equal(expected, result)

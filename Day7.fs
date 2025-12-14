@@ -54,13 +54,15 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day7/test.txt", 21)>]
   [<InlineData("Inputs/Day7/input.txt", 1560)>]
-  let ``The number of times the tachyon beam splits`` (filename: string, expected: int) =
+  let ``Part 1: The number of times the tachyon beam splits`` (filename: string, expected: int) =
     let result = filename |> parse |> TachyonManifold.countTachyonSplits
     Assert.Equal(expected, result)
 
   [<Theory>]
   [<InlineData("Inputs/Day7/test.txt", 40)>]
   [<InlineData("Inputs/Day7/input.txt", 25592971184998L)>]
-  let ``The number of different timelines a single tachyon particle could take`` (filename: string, expected: int64) =
+  let ``Part 2: The number of different timelines a single tachyon particle could take``
+    (filename: string, expected: int64)
+    =
     let result = filename |> parse |> TachyonManifold.countPossibleTimelines
     Assert.Equal(expected, result)

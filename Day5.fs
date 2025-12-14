@@ -49,14 +49,14 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day5/test.txt", 3)>]
   [<InlineData("Inputs/Day5/input.txt", 623)>]
-  let ``The number of fresh ingredient IDs`` (filename: string, expected: int) =
+  let ``Part 1: The number of fresh ingredient IDs`` (filename: string, expected: int) =
     let result = filename |> parse |> IngredientDatabase.countFreshIngredients
     Assert.Equal(expected, result)
 
   [<Theory>]
   [<InlineData("Inputs/Day5/test.txt", 14)>]
   [<InlineData("Inputs/Day5/input.txt", 353507173555373L)>]
-  let ``The total number of ingredient IDs considered fresh`` (filename: string, expected: int64) =
+  let ``Part 2: The total number of ingredient IDs considered fresh`` (filename: string, expected: int64) =
     let result =
       filename |> parse |> IngredientDatabase.countAllPossibleFreshIngredients
 

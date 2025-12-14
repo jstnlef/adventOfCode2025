@@ -91,13 +91,13 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day6/test.txt", 4277556)>]
   [<InlineData("Inputs/Day6/input.txt", 4805473544166L)>]
-  let ``The sum of all math problems`` (filename: string, expected: int64) =
+  let ``Part 1: The sum of all math problems`` (filename: string, expected: int64) =
     let result = filename |> parseAsHuman |> sumOfMathExpressions
     Assert.Equal(expected, result)
 
   [<Theory>]
   [<InlineData("Inputs/Day6/test.txt", 3263827)>]
   [<InlineData("Inputs/Day6/input.txt", 8907730960817L)>]
-  let ``The sum of all math problems with cephalopod math`` (filename: string, expected: int64) =
+  let ``Part 2: The sum of all math problems with cephalopod math`` (filename: string, expected: int64) =
     let result = filename |> parseAsCephalopod |> sumOfMathExpressions
     Assert.Equal(expected, result)

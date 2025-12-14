@@ -42,13 +42,13 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day4/test.txt", 13)>]
   [<InlineData("Inputs/Day4/input.txt", 1416)>]
-  let ``The number of accessible paper rolls`` (filename: string, expected: int) =
+  let ``Part 1: The number of accessible paper rolls`` (filename: string, expected: int) =
     let result = filename |> parse |> countAccessiblePaperRolls
     Assert.Equal(expected, result)
 
   [<Theory>]
   [<InlineData("Inputs/Day4/test.txt", 43)>]
   [<InlineData("Inputs/Day4/input.txt", 9086)>]
-  let ``The number of paper rolls which can be removed`` (filename: string, expected: int) =
+  let ``Part 2: The number of paper rolls which can be removed`` (filename: string, expected: int) =
     let result = filename |> parse |> countRemovedPaperRolls
     Assert.Equal(expected, result)

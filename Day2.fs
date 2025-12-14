@@ -32,13 +32,13 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day2/test.txt", 1227775554)>]
   [<InlineData("Inputs/Day2/input.txt", 53420042388L)>]
-  let ``The sum of all invalid IDs`` (filename: string, expected: int64) =
+  let ``Part 1: The sum of all invalid IDs`` (filename: string, expected: int64) =
     let result = filename |> parse |> findInvalidIDs isInvalid |> Array.sum
     Assert.Equal(expected, result)
 
   [<Theory>]
   [<InlineData("Inputs/Day2/test.txt", 4174379265L)>]
   [<InlineData("Inputs/Day2/input.txt", 69553832684L)>]
-  let ``The sum of all invalid IDs with the new rules`` (filename: string, expected: int64) =
+  let ``Part 2: The sum of all invalid IDs with the new rules`` (filename: string, expected: int64) =
     let result = filename |> parse |> findInvalidIDs isInvalidNewRules |> Array.sum
     Assert.Equal(expected, result)

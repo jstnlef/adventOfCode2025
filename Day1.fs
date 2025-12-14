@@ -36,13 +36,13 @@ module Tests =
   [<Theory>]
   [<InlineData("Inputs/Day1/test.txt", 3)>]
   [<InlineData("Inputs/Day1/input.txt", 1120)>]
-  let ``Count the number of times the dial is left pointing at 0 after`` (filename: string, expected: int) =
+  let ``Part 1: Count the number of times the dial is left pointing at 0 after`` (filename: string, expected: int) =
     let result = filename |> Rotations.parse |> Rotations.countZeros
     Assert.Equal(expected, result)
 
   [<Theory>]
   [<InlineData("Inputs/Day1/test.txt", 6)>]
   [<InlineData("Inputs/Day1/input.txt", 6554)>]
-  let ``The password to open the door using 0x434C49434B method`` (filename: string, expected: int) =
+  let ``Part 2: The password to open the door using 0x434C49434B method`` (filename: string, expected: int) =
     let result = filename |> Rotations.parse |> Rotations.findPassword
     Assert.Equal(expected, result)
