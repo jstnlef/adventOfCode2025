@@ -3,17 +3,14 @@ module Day9
 open System.IO
 open SkiaSharp
 
-let width (x1, _) (x2, _) = (abs (x2 - x1)) + 1
-let height (_, y1) (_, y2) = (abs (y2 - y1)) + 1
-
-let computeArea (a, b) : int64 =
-  (int64 (width a b)) * (int64 (height a b))
-
 let findLargestAreaRectangle (corners: (int * int) array) : int64 =
-  (corners, corners) ||> Array.allPairs |> Array.map computeArea |> Array.max
+  let computeArea ((x1, y1), (x2, y2)) : int64 =
+    (int64 ((abs (x2 - x1)) + 1)) * (int64 ((abs (y2 - y1)) + 1))
+
+  (corners, corners) ||> Array.allPairs |> Array.maxBy computeArea |> computeArea
 
 let findLargestAreaRectangleWithRedGreenTiles (corners: (int * int) array) : int64 =
-  let path = new SKPath()
+  use path = new SKPath()
   let sx, sy = corners[0]
   path.MoveTo(float32 sx, float32 sy)
 
@@ -22,14 +19,15 @@ let findLargestAreaRectangleWithRedGreenTiles (corners: (int * int) array) : int
 
   use region = new SKRegion(path)
 
-  let inArea ((x1, y1), (x2, y2)) =
-    region.Contains(SKRectI(x1, y1, x2, y2).Standardized)
+  let computeArea (rect: SKRectI) =
+    (int64 rect.Width + 1L) * (int64 rect.Height + 1L)
 
   (corners, corners)
   ||> Array.allPairs
-  |> Array.filter inArea
-  |> Array.map computeArea
-  |> Array.max
+  |> Array.map (fun ((x1, y1), (x2, y2)) -> SKRectI(x1, y1, x2, y2).Standardized)
+  |> Array.filter region.Contains
+  |> Array.maxBy computeArea
+  |> computeArea
 
 let parse filename =
   filename
